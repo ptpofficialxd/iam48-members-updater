@@ -1,0 +1,63 @@
+name: Fetch API and Commit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1 * * *"
+
+jobs:
+  fetch_and_commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: |
+          sudo apt install -y gron
+          npm install
+
+      - name: Fetch data and generate JSON
+        run: node fetch.js
+
+      - name: Check for changes
+        id: check_changes
+        run: git diff --quiet members.json || echo "changes=true" >> $GITHUB_OUTPUT
+
+      - name: Update Profile
+        if: steps.check_changes.outputs.changes == 'true'
+        id: update-profile
+        env:
+          UPDATE_PROFILE_URL: ${{ secrets.UPDATE_PROFILE_URL }}
+          UPDATE_PROFILE_KEY: ${{ secrets.UPDATE_PROFILE_KEY }}
+        run: |
+          git config --local diff.gron.textconv gron
+          diff=$(git diff --color=always members.json | perl -wlne 'print $1 if /^\e\[32m\+\e\[m\e\[32m(.*)\e\[m$/')
+          updated_keys=$(echo "$diff" | awk -F '[][]' '{print $2, $3}' | sort -n)
+          update_profile=$(echo "$updated_keys" | grep -oE '^[0-9]+' | sort -nu | tr '\n' '|')
+          echo "sns_update=$(echo "$updated_keys" | awk '{sub(/^\./, "", $2); a[$2]=a[$2]" "$1} END {for (k in a) print k a[k]}' | tr '\n' '|')" >> $GITHUB_OUTPUT
+          echo $update_profile
+          node update.js update_profile $update_profile
+
+      - name: Commit and push if changes
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git config user.name "github-actions"
+          git config user.email ""
+          git add .
+          git commit -m "Update members JSON"
+          git push
+
+      - name: Update SNS
+        if: steps.check_changes.outputs.changes == 'true'
+        env:
+          UPDATE_SNS_URL: ${{ secrets.UPDATE_SNS_URL }}
+          UPDATE_SNS_KEY: ${{ secrets.UPDATE_SNS_KEY }}
+          sns_update: ${{ steps.update-profile.outputs.sns_update }}
+        run: node update.js sns_update "$sns_update"
