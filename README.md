@@ -11,4 +11,11 @@
 - `.github/workflows/fetch_api.yml` — GitHub Actions workflow ที่ดึงข้อมูลและ commit `members.json` กลับโดยอัตโนมัติ
 - `.github/workflows/user_agents.yml` — Workflow สำหรับอัปเดต User-Agent gist
 
-✦ Created by [ptpofficialxd](https://github.com/ptpofficialxd)
+---
+
+<div align="center">
+
+✦ Created by **ptpofficialxd** ✦  
+[GitHub](https://github.com/ptpofficialxd) | [X](https://x.com/ptpofficialxd)
+
+</div>
