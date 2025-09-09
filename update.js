@@ -1,57 +1,74 @@
+// update.js - improved & cleaner version
+
 const fs = require("fs");
 const axios = require("axios");
 
-const filePath = "members.json";
+const FILE_PATH = "members.json";
 
-const updateProfile = async (index) => {
+/**
+ * Utilities
+ */
+const readMembers = () => JSON.parse(fs.readFileSync(FILE_PATH, "utf8"));
+
+const chunkArray = (arr, size) =>
+  arr.reduce((chunks, item, i) => {
+    const idx = Math.floor(i / size);
+    chunks[idx] = [].concat(chunks[idx] || [], item);
+    return chunks;
+  }, []);
+
+/**
+ * Build payload for profile update
+ */
+const buildPayload = (membersArray) => ({
+  table: "members",
+  method: "upsertMany",
+  data: null,
+  options: {
+    condition_column: "id",
+    data_list: membersArray.map((m) => ({
+      id: m?.id,
+      code_name: m?.codeName,
+      display_name: m?.displayName,
+      display_name_en: m?.displayNameEn,
+      subtitle: m?.subtitle,
+      subtitle_en: m?.subtitleEn,
+      profile_image_url: m?.profileImageUrl,
+      cover_image_url: m?.coverImageUrl,
+      caption: m?.caption,
+      formal_display_name: m?.formalDisplayName,
+      city: m?.city,
+      city_en: m?.cityEn,
+      country: m?.country,
+      country_en: m?.countryEn,
+      brand: m?.brand,
+      hashtags: m?.hashtags && JSON.stringify(m.hashtags),
+      birthdate: m?.birthdate,
+      graduated_at: m?.graduatedAt,
+    })),
+  },
+});
+
+/**
+ * Update profile by index string (e.g. "1|2|3")
+ */
+async function updateProfile(indexStr) {
   try {
-    const data = fs.readFileSync(filePath, "utf8");
+    const members = readMembers();
+    const indices = indexStr
+      .trim()
+      .split("|")
+      .filter((i) => members[i]);
+
     const perChunk = 10;
-    const members = JSON.parse(data)
-    const membersArrays = index.trim().split('|')
-    .filter(index => members[index]) // Filter out invalid indices
-    .map(index => members[index])
-    .reduce((all, one, i) => {
-      const ch = Math.floor(i / perChunk);
-      all[ch] = [].concat(all[ch] || [], one);
-      return all;
-    }, []);
+    const memberChunks = chunkArray(indices.map((i) => members[i]), perChunk);
+
     let results = [];
 
-    for (let idx = 0; idx < membersArrays.length; idx++) {
-      console.log(`# ${idx + 1} : START`);
-      const membersArray = membersArrays[idx];
-      const payload = {
-        table: "members",
-        method: "upsertMany",
-        data: null,
-        options: {
-          condition_column: "id",
-          data_list: membersArray.map((member) => {
-            console.log("member:", member?.codeName);
-            return {
-              id: member?.id,
-              code_name: member?.codeName,
-              display_name: member?.displayName,
-              display_name_en: member?.displayNameEn,
-              subtitle: member?.subtitle,
-              subtitle_en: member?.subtitleEn,
-              profile_image_url: member?.profileImageUrl,
-              cover_image_url: member?.coverImageUrl,
-              caption: member?.caption,
-              formal_display_name: member?.formalDisplayName,
-              city: member?.city,
-              city_en: member?.cityEn,
-              country: member?.country,
-              country_en: member?.countryEn,
-              brand: member?.brand,
-              hashtags: member?.hashtags && JSON.stringify(member.hashtags),
-              birthdate: member?.birthdate,
-              graduated_at: member?.graduatedAt,
-            };
-          }),
-        },
-      };
+    for (let i = 0; i < memberChunks.length; i++) {
+      console.log(`[update.js] #${i + 1} : START`);
+
+      const payload = buildPayload(memberChunks[i]);
       const headers = {
         "Content-Type": "application/json",
         "x-api-key": process.env.UPDATE_PROFILE_KEY,
@@ -60,71 +77,83 @@ const updateProfile = async (index) => {
       try {
         const res = await axios.post(process.env.UPDATE_PROFILE_URL, payload, { headers });
         const total = res.data.result?.total;
-        console.log(`# ${idx + 1} : ${JSON.stringify(total)}\n`);
+        console.log(`[update.js] #${i + 1} result: ${JSON.stringify(total)}`);
         results.push(total);
       } catch (err) {
-        console.error("Error:", err.message);
-        continue;
+        console.error("[update.js] Error:", err.message);
       }
     }
-    const totalUpdate =
-      results.reduce((sum, result) => sum + (result?.update || 0), 0);
-    const totalCreate =
-      results.reduce((sum, result) => sum + (result?.create || 0), 0);
-    console.log(`Total update: ${totalUpdate}`);
-    console.log(`Total create: ${totalCreate}`);
-    console.log('========== Done ==========')
+
+    const totalUpdate = results.reduce((sum, r) => sum + (r?.update || 0), 0);
+    const totalCreate = results.reduce((sum, r) => sum + (r?.create || 0), 0);
+
+    console.log(`[update.js] Total update: ${totalUpdate}`);
+    console.log(`[update.js] Total create: ${totalCreate}`);
+    console.log("[update.js] ===== Done =====");
   } catch (err) {
-    console.error("Error:", err.message);
+    console.error("[update.js] Error:", err.message);
     process.exit(1);
   }
-};
+}
 
-const updateSNS = async (groupedKeys) => {
+/**
+ * Update SNS by grouped keys string (e.g. "twitter 0 1|instagram 2 3")
+ */
+async function updateSNS(groupedKeys) {
   try {
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-    const keysLines = groupedKeys.split('|')
+    const data = readMembers();
+    const keysLines = groupedKeys.split("|");
 
     const resultObject = keysLines.reduce((result, line) => {
-      const [key, ...indices] = line.split(/\s+/)
-      const keyExists = data.some(obj => obj.hasOwnProperty(key))
+      const [key, ...indices] = line.trim().split(/\s+/);
+      const keyExists = data.some((obj) => Object.prototype.hasOwnProperty.call(obj, key));
       if (keyExists) {
-        result[key] = (result[key] || []).concat(indices
-          .map(index => ({ id: data[index]?.id }))
-          .filter(obj => obj.id !== undefined)
-        )
+        result[key] = (result[key] || []).concat(
+          indices
+            .map((i) => ({ id: data[i]?.id }))
+            .filter((obj) => obj.id !== undefined)
+        );
       }
-      return result
-    }, {})
+      return result;
+    }, {});
 
-    console.log('Working...')
+    console.log("[update.js] Updating SNS...");
 
-    await axios.post(process.env.UPDATE_SNS_URL, resultObject, { headers: {
-      "Content-Type": "application/json",
-      "x-api-key": process.env.UPDATE_SNS_KEY,
-    }})
-    console.log('======== Done ========')
+    await axios.post(process.env.UPDATE_SNS_URL, resultObject, {
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.UPDATE_SNS_KEY,
+      },
+    });
 
+    console.log("[update.js] ===== SNS Done =====");
   } catch (err) {
-    console.error("Error:", err.message)
-    process.exit(1)
+    console.error("[update.js] Error:", err.message);
+    process.exit(1);
   }
 }
 
-const arg = process.argv[2]
-switch (arg) {
-  case 'update_profile':
-    console.log('===== Update Profile =====')
-    const index = process.argv[3]
-    console.log('index:', index)
-    updateProfile(index)
-    break
-  case 'sns_update':
-    console.log('===== Update SNS =====')
-    const groupedKeys = process.argv[3]
-    updateSNS(groupedKeys)
-    break
-  default:
-    console.log('Invalid argument')
-    break
-}
+/**
+ * CLI Entrypoint
+ */
+(async function main() {
+  const cmd = process.argv[2];
+  switch (cmd) {
+    case "update_profile": {
+      const index = process.argv[3] || "";
+      console.log("[update.js] ===== Update Profile =====");
+      await updateProfile(index);
+      break;
+    }
+    case "sns_update": {
+      const groupedKeys = process.argv[3] || "";
+      console.log("[update.js] ===== Update SNS =====");
+      await updateSNS(groupedKeys);
+      break;
+    }
+    default:
+      console.log("Usage:");
+      console.log("  node update.js update_profile \"1|2|3\"");
+      console.log("  node update.js sns_update \"twitter 0 1|instagram 2 3\"");
+  }
+})();
