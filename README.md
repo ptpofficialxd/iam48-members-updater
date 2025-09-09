@@ -1,4 +1,4 @@
-# iAM48-members
+# iAM48-members-updater
 
 เก็บข้อมูล **Member BNK48 & CGM48** ในรูปแบบ JSON โดยดึงจาก API [`https://public.bnk48.io/members/all`](https://public.bnk48.io/members/all) และอัปเดตอัตโนมัติด้วย **GitHub Actions**  
 
