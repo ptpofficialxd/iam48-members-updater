@@ -13,9 +13,15 @@
 
 ---
 
+📖 This project is **open source** — feel free to use, modify, and contribute.  
+📖 โปรเจกต์นี้เป็น **โอเพนซอร์ส** — ยินดีให้ทุกคนนำไปใช้งาน ปรับปรุง และพัฒนาต่อได้อย่างอิสระ  
+
+---
+
 <div align="center">
 
-✦ Created by **ptpofficialxd** ✦  
+🔗 Based on [oshi48](https://github.com/oshi48)  
+✦ Built & maintained by **ptpofficialxd** ✦  
 [GitHub](https://github.com/ptpofficialxd) | [X](https://x.com/ptpofficialxd)
 
 </div>
