@@ -1818,7 +1818,7 @@
     ],
     "isGiftEnabled": true,
     "birthdate": "1998-12-03",
-    "graduatedAt": null
+    "graduatedAt": "2026-03-05"
   },
   {
     "id": 79,
@@ -1842,7 +1842,7 @@
     ],
     "isGiftEnabled": true,
     "birthdate": "2002-04-22",
-    "graduatedAt": null
+    "graduatedAt": "2026-03-05"
   },
   {
     "id": 80,
@@ -1866,7 +1866,7 @@
     ],
     "isGiftEnabled": true,
     "birthdate": "2003-01-22",
-    "graduatedAt": null
+    "graduatedAt": "2026-03-05"
   },
   {
     "id": 81,
@@ -1914,7 +1914,7 @@
     ],
     "isGiftEnabled": true,
     "birthdate": "2003-08-02",
-    "graduatedAt": null
+    "graduatedAt": "2026-03-05"
   },
   {
     "id": 83,
@@ -1995,7 +1995,7 @@
     "displayNameEn": "KAOFRANG",
     "subtitle": "ญาณิศา เมืองคำ",
     "subtitleEn": "Yanisa Muangkam",
-    "profileImageUrl": "https://img.bnk48cdn.net/member/86/profile-45ce10b520034cc7bfa48bd48377abc2.jpg",
+    "profileImageUrl": "https://img.bnk48cdn.net/member/86/profile-6ed0efffe40d408bb13db261a8e0fc05.jpg",
     "coverImageUrl": "https://img.bnk48cdn.net/member/86/cover-8e6dd6af2a1d4953973f6b5ee5a89152.jpg",
     "caption": "ฝากเพลง วาสนาผู้ใด ด้วยนะคะ",
     "formalDisplayName": "Kaofrang",
@@ -2010,7 +2010,7 @@
     ],
     "isGiftEnabled": true,
     "birthdate": "2002-11-15",
-    "graduatedAt": null
+    "graduatedAt": "2026-03-05"
   },
   {
     "id": 87,
@@ -2034,7 +2034,7 @@
     ],
     "isGiftEnabled": true,
     "birthdate": "2007-07-08",
-    "graduatedAt": null
+    "graduatedAt": "2026-03-05"
   },
   {
     "id": 88,
@@ -2154,7 +2154,7 @@
     ],
     "isGiftEnabled": true,
     "birthdate": "2004-04-02",
-    "graduatedAt": null
+    "graduatedAt": "2026-03-05"
   },
   {
     "id": 93,
@@ -2226,7 +2226,7 @@
     ],
     "isGiftEnabled": true,
     "birthdate": "2001-10-09",
-    "graduatedAt": null
+    "graduatedAt": "2026-03-05"
   },
   {
     "id": 96,
