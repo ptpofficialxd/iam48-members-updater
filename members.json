@@ -2007,7 +2007,7 @@
     "profileImageUrl": "https://img.bnk48cdn.net/member/77/profile-a2bb8515d0b1491083eb2fa54e1e7997.jpg",
     "coverImageUrl": "https://img.bnk48cdn.net/member/77/cover-85756302cf69455ca2ec750219991170.jpg",
     "caption": "",
-    "version": 4045,
+    "version": 5873,
     "formalDisplayName": "Admin",
     "city": "กรุงเทพ",
     "cityEn": "Bangkok",
@@ -2016,7 +2016,7 @@
     "birthdateField": "2020-03-25T00:00:00",
     "brand": "BNK48",
     "hashtags": null,
-    "isGiftEnabled": false,
+    "isGiftEnabled": true,
     "graduatedAtField": null,
     "birthdate": "2020-03-25",
     "graduatedAt": null
